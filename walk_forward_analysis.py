@@ -31,6 +31,9 @@ os.makedirs(OUT_DIR, exist_ok=True)
 ASSET = 'BTC'
 TIMEFRAME = '60m'
 TCOST = 0.0016
+LEVERAGE = 2
+FUNDING_PER_8H = 0.0001
+SL_PCT = 0.15
 START_YM = '2024-01'   # WF starts here (2023 = pure IS warm-up)
 N_TRIALS = 80
 BARS_PER_YEAR = 365 * 24
@@ -69,41 +72,69 @@ def generate_signals_on_df(df, ema_period, bb_window, bb_dev):
 
 
 def run_fast_on_slice(df_full, ema_period, bb_window, bb_dev, tcost, initial_nav=100,
-                      backtest_start=None, backtest_end=None):
+                      backtest_start=None, backtest_end=None,
+                      leverage=LEVERAGE, sl_pct=SL_PCT, funding_per_8h=FUNDING_PER_8H):
     """
-    Compute indicators on full df (for warmup), then backtest only the
-    [backtest_start:backtest_end] slice. If both are None, backtest entire df.
+    Compute indicators on full df (for warmup), then leveraged backtest only the
+    [backtest_start:backtest_end] slice.
     """
     df = generate_signals_on_df(df_full, ema_period, bb_window, bb_dev)
 
-    # Slice to backtest window
     if backtest_start is not None or backtest_end is not None:
         df = df.loc[backtest_start:backtest_end].copy()
 
-    close = df['close'].to_numpy(dtype=np.float64)
-    signal = df['signal'].to_numpy(dtype=np.float64)
-    n = close.shape[0]
+    close = df['close'].values
+    signal = df['signal'].values
+    n = len(close)
     if n == 0:
         return pd.Series(dtype=float), pd.DataFrame()
 
-    tp_mult = 1 + 1.0   # TP 100% = no cap
-    sl_mult = 1 - 0.15   # SL 15%
+    nav = np.zeros(n)
+    nav[0] = initial_nav
+    cur_nav = initial_nav
+    in_pos = False
+    entry_px = 0.0
+    qty = 0.0
+    bars_in = 0
+    trades = []
 
-    qty, trade, pnl_raw, tcost_arr, pnl_tcost, nav = _bt_kernel_singlepos_stepwise(
-        close, signal, tp_mult, sl_mult, 1000000, tcost, initial_nav, n - 1
-    )
+    for i in range(1, n):
+        px = close[i]
+        prev_px = close[i - 1]
+
+        if in_pos:
+            pnl = (px - prev_px) * qty
+            bars_in += 1
+            funding = abs(qty) * px * funding_per_8h if bars_in % 8 == 0 else 0.0
+            cur_nav += pnl - funding
+
+            if cur_nav <= 0:
+                cur_nav = 0.001
+                in_pos = False
+                trades.append({'pnl_tcost': -initial_nav})
+                nav[i] = cur_nav
+                continue
+
+            pos_ret = (px - entry_px) / entry_px
+            if pos_ret <= -sl_pct or signal[i] == 0:
+                tc = abs(qty) * px * tcost
+                cur_nav -= tc
+                trades.append({'pnl_tcost': (px - entry_px) * qty - tc})
+                in_pos = False
+                qty = 0.0
+        else:
+            if signal[i] == 1 and signal[i-1] == 0 and cur_nav > 1:
+                entry_px = px
+                qty = (cur_nav * leverage) / px
+                tc = abs(qty) * px * tcost
+                cur_nav -= tc
+                in_pos = True
+                bars_in = 0
+
+        nav[i] = cur_nav
 
     nav_series = pd.Series(nav, index=df.index)
-
-    # Reconstruct trades
-    df_out = df.copy()
-    df_out['trade'] = trade
-    try:
-        trades_df = _reconstruct_trades_from_series(df_out, df_out['trade'], df_out['close'],
-                                                     tcost_rate=tcost, tp_mult=tp_mult, sl_mult=sl_mult)
-    except:
-        trades_df = pd.DataFrame()
-
+    trades_df = pd.DataFrame(trades) if trades else pd.DataFrame()
     return nav_series, trades_df
 
 

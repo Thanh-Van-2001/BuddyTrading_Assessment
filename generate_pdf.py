@@ -307,15 +307,16 @@ def build():
     pdf.tbl(
         ['', 'Full Backtest (IS)', 'Walk-Forward (OOS)'],
         [
-            ['Total Return (1x)', '+160.0%', '+17.5%'],
-            ['Sharpe (1x)', '1.78', '0.52'],
-            ['Max DD (1x)', '-12.3%', '-15.1%'],
+            ['Total Return', '+422.0%', '+38.2%'],
+            ['Ann. Return', '77.7%', '18.8%'],
+            ['Sharpe', '1.82', '0.56'],
+            ['Max DD', '-24.6%', '-31.9%'],
         ],
         cw=[40, 75, 75]
     )
     pdf.txt(
-        'IS-to-OOS decay (1.78 -> 0.52) is typical. Strategy remains profitable OOS, confirming '
-        'edge is not purely in-sample. OOS params converge to same region as full-sample.'
+        'IS-to-OOS Sharpe decay (1.82 -> 0.56) is typical. Strategy remains profitable OOS (+38.2% '
+        'total over 23 months with 2x leverage). OOS params converge to same region as full-sample.'
     )
 
     # Critique
@@ -336,7 +337,7 @@ def build():
     pdf.blt('Small sample: 67 trades over 2.9 years. Profitability driven by ~5 large winners. Removing best '
             '2-3 trades would substantially reduce returns.')
     pdf.blt('Concentration: 200% notional in single BTC position. Black swan events amplified by leverage.')
-    pdf.blt('WF OOS Sharpe (0.52 at 1x) below IS (1.78), suggesting part of the edge may not persist.')
+    pdf.blt('WF OOS Sharpe (0.56) below IS (1.82), suggesting part of the edge may not persist.')
 
     pdf.ln(2)
     pdf.set_font('Helvetica', 'I', 6.5)
