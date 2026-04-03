@@ -86,15 +86,15 @@ def build():
     pdf.cell(0, 7, 'Trend Following: Bollinger Bands + EMA Filter', align='C', new_x="LMARGIN", new_y="NEXT")
     pdf.set_font('Helvetica', '', 8.5)
     pdf.set_text_color(80, 80, 80)
-    pdf.cell(0, 4.5, 'BTC/USD Spot  |  Coinbase  |  60-Min Bars  |  Long-Only  |  Jan 2023 - Nov 2025', align='C', new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 4.5, 'BTC/USD Perpetual Futures  |  Coinbase  |  60-Min  |  Long-Only  |  2x Leverage  |  2023-2025', align='C', new_x="LMARGIN", new_y="NEXT")
     pdf.ln(3)
 
     # 1. Instrument
     pdf.sec('1. Market & Instrument')
     pdf.tbl(
         ['Exchange', 'Instrument', 'Mode', 'Direction', 'Timeframe'],
-        [['Coinbase (Advanced)', 'BTC/USD Spot', 'Spot (1x, no leverage)', 'Long-only', '60 min']],
-        cw=[36, 36, 46, 34, 38]
+        [['Coinbase (Advanced)', 'BTC/USD Perp Futures', '2x Leverage', 'Long-only', '60 min']],
+        cw=[36, 40, 40, 34, 40]
     )
 
     # 2. Hypothesis
@@ -155,11 +155,11 @@ def build():
     pdf.tbl(
         ['Rule', 'Setting', 'Note'],
         [
-            ['Position Size', '100% equity', 'Max 1 concurrent position, no pyramiding'],
-            ['Stop-Loss', '15% from entry', 'Hard safety net; never triggered (worst = -5.7%)'],
-            ['Take-Profit', 'No cap', 'Exit via signal only (best trade = +23.4%)'],
-            ['Leverage', '1x (spot only)', 'No margin or futures exposure'],
-            ['Max Risk / Trade', '15% of equity', 'Bounded by stop-loss level'],
+            ['Position Size', '100% equity x 2', 'Notional = 2x equity per trade'],
+            ['Stop-Loss', '15% from entry', 'On position; = 30% equity risk max'],
+            ['Take-Profit', 'No cap', 'Exit via signal (best = +46.8%)'],
+            ['Leverage', '2x', 'Perpetual futures, cross margin'],
+            ['Funding Rate', '0.01% / 8h', 'Standard perp futures funding cost'],
         ],
         cw=[32, 33, 125]
     )
@@ -169,11 +169,13 @@ def build():
     pdf.tbl(
         ['Parameter', 'Value'],
         [
-            ['Data Source', 'Coinbase BTC/USD spot OHLCV candles'],
+            ['Data Source', 'Coinbase BTC/USD OHLCV candles (60-min)'],
             ['Period', 'Jan 1, 2023 - Nov 16, 2025 (2.9 years, 25,220 bars)'],
-            ['Trading Fees', '0.16% round-trip (Coinbase Advanced taker fee)'],
-            ['Slippage', '0 assumed (hourly bars, BTC/USD highly liquid)'],
-            ['Execution', 'Filled at bar close price; no partial fills'],
+            ['Trading Fees', '0.16% round-trip (taker fee per side)'],
+            ['Funding Rate', '0.01% per 8 hours while in position'],
+            ['Slippage', '0 assumed (hourly bars, BTC highly liquid)'],
+            ['Execution', 'Filled at bar close; no partial fills'],
+            ['Leverage', '2x (perpetual futures)'],
             ['Starting Capital', '$100'],
         ],
         cw=[35, 155]
@@ -188,13 +190,13 @@ def build():
     pdf.tbl(
         ['Metric', 'Value', 'Metric', 'Value'],
         [
-            ['Total Return', '+160.0%', 'Win Rate', '44.8% (30W / 37L)'],
-            ['Ann. Return', '+39.4%', 'Profit Factor', '2.36'],
-            ['Volatility', '22.2%', 'Avg Win / Avg Loss', '2.92x'],
-            ['Sharpe Ratio', '1.78', 'Avg Trade Return', '+1.57%'],
-            ['Max Drawdown', '-12.3%', 'Avg Trade Duration', '2.6 days'],
-            ['Return / DD', '3.20x', 'Total Trades', '67'],
-            ['Fee Drag', '$40.61 (20.2%)', 'Gross PnL', '$200.59'],
+            ['Total Return', '+422.0%', 'Win Rate', '44.8% (30W / 37L)'],
+            ['Ann. Return', '+77.7%', 'Profit Factor', '2.12'],
+            ['Volatility', '42.7%', 'Avg Win / Avg Loss', '3.37x'],
+            ['Sharpe Ratio', '1.82', 'Avg Trade Return', '+3.14%'],
+            ['Max Drawdown', '-24.6%', 'Avg Trade Duration', '2.6 days'],
+            ['Return / DD', '3.16x', 'Total Trades', '67'],
+            ['Fee Drag', '$137 (23.2%)', 'Gross PnL', '$590.20'],
         ],
         cw=[35, 60, 40, 55]
     )
@@ -204,9 +206,9 @@ def build():
     pdf.tbl(
         ['Year', 'Trades', 'Net PnL', 'Win Rate', 'Return'],
         [
-            ['2023', '25', '$72.36', '40%', '+72.4%'],
-            ['2024', '28', '$72.53', '54%', '+42.1%'],
-            ['2025 (YTD Nov)', '14', '$15.09', '36%', '+6.2%'],
+            ['2023', '25', '$172.81', '40%', '+172.8%'],
+            ['2024', '28', '$226.81', '54%', '+91.7%'],
+            ['2025 (YTD Nov)', '14', '$53.49', '36%', '+11.8%'],
         ],
         cw=[35, 22, 40, 30, 63]
     )
@@ -214,7 +216,7 @@ def build():
     pdf.sub('Trade Return Distribution')
     pdf.tbl(
         ['', 'Min', '5th', '25th', 'Median', '75th', '95th', 'Max'],
-        [['Return', '-5.71%', '-2.99%', '-1.51%', '-0.48%', '+2.57%', '+14.50%', '+23.38%']],
+        [['Return', '-11.4%', '-5.99%', '-3.03%', '-0.97%', '+5.13%', '+29.0%', '+46.8%']],
         cw=[22, 22, 22, 22, 26, 22, 26, 28]
     )
     pdf.txt(
@@ -224,14 +226,14 @@ def build():
 
     # Equity curve
     pdf.sub('Equity Curve & Drawdown')
-    img = os.path.join(IMG_DIR, 'BBEMA_BTC_60m_equity_drawdown.png')
+    img = os.path.join(IMG_DIR, 'BBEMA_2x_equity_drawdown.png')
     if os.path.exists(img):
         pdf.image(img, x=10, w=190)
     pdf.ln(0.5)
 
     # Monthly returns
     pdf.sub('Monthly Returns (%)')
-    img2 = os.path.join(IMG_DIR, 'BBEMA_BTC_60m_monthly_returns.png')
+    img2 = os.path.join(IMG_DIR, 'BBEMA_2x_monthly_returns.png')
     if os.path.exists(img2):
         pdf.image(img2, x=10, w=190)
 
@@ -241,21 +243,21 @@ def build():
     # BTC Buy & Hold comparison
     pdf.sub('Strategy vs BTC Buy & Hold')
     pdf.tbl(
-        ['', 'Strategy', 'BTC Buy & Hold'],
+        ['', 'Strategy (2x)', 'BTC Buy & Hold'],
         [
-            ['Total Return', '+160.0%', '+468.5%'],
-            ['Ann. Return', '+39.4%', '+83.0%'],
-            ['Volatility', '22.2%', '46.2%'],
-            ['Sharpe Ratio', '1.78', '1.80'],
-            ['Max Drawdown', '-12.3%', '-27.7%'],
+            ['Total Return', '+422.0%', '+470.6%'],
+            ['Ann. Return', '+77.7%', '+83.0%'],
+            ['Volatility', '42.7%', '46.2%'],
+            ['Sharpe Ratio', '1.82', '1.80'],
+            ['Max Drawdown', '-24.6%', '-27.7%'],
             ['Time in Market', '16.3%', '100%'],
         ],
         cw=[38, 76, 76]
     )
     pdf.txt(
-        'B&H outperforms on absolute return due to the strong BTC bull cycle (2023-2025). However, the '
-        'strategy achieves a comparable Sharpe (1.78 vs 1.80) with less than half the drawdown (-12% vs '
-        '-28%) and only 16% time exposure. Capital is free 84% of the time for other opportunities.'
+        'With 2x leverage, the strategy nearly matches B&H absolute return (+422% vs +471%) with a '
+        'slightly higher Sharpe (1.82 vs 1.80), lower drawdown (-24.6% vs -27.7%), and only 16% time '
+        'exposure. Capital is free 84% of the time for other strategies or yield.'
     )
 
     # Top trades
@@ -263,14 +265,14 @@ def build():
     pdf.tbl(
         ['#', 'Entry Date', 'Entry $', 'Exit $', 'Return', 'Duration'],
         [
-            ['W1', '2024-11-05', '$71,134', '$88,019', '+23.4%', '8.6 days'],
-            ['W2', '2024-02-26', '$52,851', '$61,825', '+16.6%', '5.0 days'],
-            ['W3', '2023-03-13', '$23,628', '$27,608', '+16.5%', '7.7 days'],
-            ['W4', '2023-10-19', '$29,010', '$33,767', '+16.1%', '6.6 days'],
-            ['W5', '2023-12-01', '$38,820', '$43,174', '+10.9%', '6.3 days'],
-            ['L1', '2024-01-11', '$48,695', '$46,068', '-5.7%', '2 hours'],
-            ['L2', '2025-08-10', '$121,833', '$118,404', '-3.1%', '1.3 days'],
-            ['L3', '2024-04-08', '$71,988', '$69,985', '-3.1%', '1.2 days'],
+            ['W1', '2024-11-05', '$71,134', '$88,019', '+46.8%', '8.6 days'],
+            ['W2', '2024-02-26', '$52,851', '$61,825', '+33.3%', '5.0 days'],
+            ['W3', '2023-03-13', '$23,628', '$27,608', '+33.0%', '7.7 days'],
+            ['W4', '2023-10-19', '$29,010', '$33,767', '+32.1%', '6.6 days'],
+            ['W5', '2023-12-01', '$38,820', '$43,174', '+21.8%', '6.3 days'],
+            ['L1', '2024-01-11', '$48,695', '$46,068', '-11.4%', '2 hours'],
+            ['L2', '2025-08-10', '$121,833', '$118,404', '-6.3%', '1.3 days'],
+            ['L3', '2024-04-08', '$71,988', '$69,985', '-6.2%', '1.2 days'],
         ],
         cw=[12, 32, 32, 32, 25, 57], fs=7
     )
@@ -280,12 +282,12 @@ def build():
     pdf.tbl(
         ['Regime', 'Period', 'Return', 'Stat', 'Value'],
         [
-            ['Bull', 'Sep 23 - Mar 24', '+57.7%', 'Time in market', '16.3%'],
-            ['Bull', 'Sep 24 - Dec 24', '+19.8%', 'Time flat', '83.7%'],
-            ['Bull', 'Apr 25 - Oct 25', '+9.8%', 'Max win streak', '4'],
-            ['Bear', 'Jun - Aug 2024', '-0.2%', 'Max loss streak', '9'],
+            ['Bull', 'Sep 23 - Mar 24', '+136.6%', 'Time in market', '16.3%'],
+            ['Bull', 'Sep 24 - Dec 24', '+35.8%', 'Time flat', '83.7%'],
+            ['Bull', 'Apr 25 - Oct 25', '+16.9%', 'Max win streak', '4'],
+            ['Bear', 'Jun - Aug 2024', '-0.6%', 'Max loss streak', '9'],
             ['Bear', 'Jan - Mar 2025', '0.0%', 'DD recovery', '34 days'],
-            ['Sideway', 'Feb - Sep 2023', '+32.0%', 'Expectancy', '$2.39/trade'],
+            ['Sideway', 'Feb - Sep 2023', '+63.9%', 'Expectancy', '$6.77/trade'],
         ],
         cw=[24, 40, 28, 40, 58]
     )
@@ -305,9 +307,9 @@ def build():
     pdf.tbl(
         ['', 'Full Backtest (IS)', 'Walk-Forward (OOS)'],
         [
-            ['Total Return', '+160.0%', '+17.5%'],
-            ['Sharpe', '1.78', '0.52'],
-            ['Max DD', '-12.3%', '-15.1%'],
+            ['Total Return (1x)', '+160.0%', '+17.5%'],
+            ['Sharpe (1x)', '1.78', '0.52'],
+            ['Max DD (1x)', '-12.3%', '-15.1%'],
         ],
         cw=[40, 75, 75]
     )
@@ -327,12 +329,14 @@ def build():
 
     pdf.sub('Key Risks')
     pdf.blt('Regime change: if BTC becomes structurally mean-reverting, trend logic generates persistent losses.')
-    pdf.blt('Fee sensitivity: fees consume 20.2% of gross PnL. At 0.25% round-trip, strategy becomes marginal.')
-    pdf.blt('Small sample: 67 trades over 2.9 years. Profitability driven by ~5 large winners (top 5 = majority '
-            'of PnL). Removing best 2-3 trades would substantially reduce returns.')
-    pdf.blt('Concentration risk: 100% equity in single BTC position. Black swan events directly impact portfolio. '
-            '15% SL provides partial protection.')
-    pdf.blt('WF OOS Sharpe (0.52) well below IS (1.78), suggesting part of the backtest edge may not persist.')
+    pdf.blt('Fee + funding sensitivity: fees+funding consume 23.2% of gross PnL. Higher funding during volatile '
+            'periods would erode returns further.')
+    pdf.blt('Leverage risk: 2x amplifies losses; worst trade = -11.4% equity. At 5x+ leverage the strategy '
+            'risks liquidation during sharp moves. 2x chosen as conservative sweet spot.')
+    pdf.blt('Small sample: 67 trades over 2.9 years. Profitability driven by ~5 large winners. Removing best '
+            '2-3 trades would substantially reduce returns.')
+    pdf.blt('Concentration: 200% notional in single BTC position. Black swan events amplified by leverage.')
+    pdf.blt('WF OOS Sharpe (0.52 at 1x) below IS (1.78), suggesting part of the edge may not persist.')
 
     pdf.ln(2)
     pdf.set_font('Helvetica', 'I', 6.5)
