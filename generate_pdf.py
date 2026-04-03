@@ -342,7 +342,8 @@ def build():
     pdf.ln(2)
     pdf.set_font('Helvetica', 'I', 6.5)
     pdf.set_text_color(140, 140, 140)
-    pdf.cell(0, 3.5, 'Tools: Python (pandas, ta, optuna, numba). Code and data available upon request.', new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 3.5, 'Tools: Python (pandas, ta, optuna, numba).', new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 3.5, 'Code & data: https://github.com/Thanh-Van-2001/BuddyTrading_Assessment', new_x="LMARGIN", new_y="NEXT")
 
     pdf.output(OUT_PATH)
     sz = os.path.getsize(OUT_PATH)
