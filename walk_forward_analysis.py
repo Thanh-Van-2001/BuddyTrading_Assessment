@@ -21,7 +21,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from coinlion_backtest_coinlion_data import TrendFollowingBBEMA, _bt_kernel_singlepos_stepwise, _reconstruct_trades_from_series
+from backtest_engine import TrendFollowingBBEMA, _bt_kernel_singlepos_stepwise, _reconstruct_trades_from_series
 
 PRICE_DATA_DIR = 'D:/coinlion_data/coinlion/candle data/'
 OUT_DIR = 'backtest_results_coinlion_data/walk_forward/'

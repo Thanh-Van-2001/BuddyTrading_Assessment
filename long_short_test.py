@@ -17,7 +17,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from coinlion_backtest_coinlion_data import (
+from backtest_engine import (
     BackTestSA, _bt_kernel_singlepos_stepwise, _reconstruct_trades_from_series
 )
 

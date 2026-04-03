@@ -16,7 +16,7 @@ import pandas as pd
 import optuna
 from optuna.samplers import TPESampler
 
-from coinlion_backtest_coinlion_data import TrendFollowingBBEMA
+from backtest_engine import TrendFollowingBBEMA
 
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 

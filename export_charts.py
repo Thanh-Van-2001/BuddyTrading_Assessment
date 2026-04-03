@@ -9,7 +9,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from coinlion_backtest_coinlion_data import TrendFollowingBBEMA
+from backtest_engine import TrendFollowingBBEMA
 
 PRICE_DATA_DIR = 'D:/coinlion_data/coinlion/candle data/'
 
