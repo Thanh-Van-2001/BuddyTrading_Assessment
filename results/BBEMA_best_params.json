@@ -1,0 +1,23 @@
+{
+  "best_params": {
+    "ema_period": 950,
+    "bb_window": 75,
+    "bb_dev": 3.0
+  },
+  "best_sharpe": 1.7741533303955268,
+  "best_metrics": {
+    "total_ret": 1.6620683959265419,
+    "cagr": 0.40506713867197397,
+    "vol": 0.20333464393689032,
+    "sharpe": 1.7741533303955268,
+    "max_dd": -0.14205603632709635,
+    "n_trades": 66.0,
+    "win_rate": 45.45454545454545,
+    "final_nav": 266.2068395926542
+  },
+  "baseline_params": {
+    "ema_period": 1000,
+    "bb_window": 75,
+    "bb_dev": 3.0
+  }
+}
